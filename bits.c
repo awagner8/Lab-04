@@ -123,7 +123,7 @@ NOTES:
  *   Rating: 2
  */
 int isNegative(int x) {
-   return 2; 
+   return (x >> 31) & 1; 
 }
 /* 
  * negate - return -x 
@@ -133,7 +133,7 @@ int isNegative(int x) {
  *   Rating: 2
  */
 int negate(int x) {
-  return 2;
+  return ~x + 1;
 }
 /* 
  * getByte - Extract byte n from word x
@@ -144,7 +144,7 @@ int negate(int x) {
  *   Rating: 2
  */
 int getByte(int x, int n) {
-  return 2;
+  return (x >> (n << 3)) & 0xff;
 }
 /* 
  * byteSwap - swaps the nth byte and the mth byte
@@ -156,7 +156,11 @@ int getByte(int x, int n) {
  *  Rating: 2
  */
 int byteSwap(int x, int n, int m) {
-    return 2;
+    int nth_byte = (x >> (n << 3)) & 0xFF; // Extract the nth byte
+    int mth_byte = (x >> (m << 3)) & 0xFF; // Extract the mth byte
+    int swapped = x & ~((0xFF << (n << 3)) | (0xFF << (m << 3))); // Clear the nth and mth bytes of x
+    swapped |= (nth_byte << (m << 3)) | (mth_byte << (n << 3)); // Insert the nth byte at the mth position and the mth byte at the nth position
+    return swapped;
 }
 /* 
  * rotateRight - Rotate x to the right by n bits
@@ -167,7 +171,10 @@ int byteSwap(int x, int n, int m) {
  *   Rating: 3 
  */
 int rotateRight(int x, int n) {
-    return 2;
+   int shift = 32 - n;
+   int right = (x >> n) & ~(~0 << shift);
+   int left = x << shift;
+   return right | left;
 }
 /* 
  * addOK - Determine if can compute x+y without overflow
@@ -178,5 +185,9 @@ int rotateRight(int x, int n) {
  *   Rating: 3
  */
 int addOK(int x, int y) {
-  return 2;
+  int sum = x + y;
+   int sign_x = x >> 31;
+   int sign_y = y >> 31;
+   int sign_sum = sum >> 31;
+   return !!(sign_x ^ sign_y) | !(sign_x ^ sign_sum);
 }
